@@ -1,0 +1,77 @@
+ClassIsland WS Bridge
+=====================
+ClassIsland WebSocket 桥接器
+Copyright (c) 2026 Zn-Jiang
+
+本软件以 MIT 许可证发布（见 LICENSE 文件）。
+This software is licensed under the MIT License (see LICENSE file).
+
+
+第三方组件声明 / Third-Party Notices
+===================================
+
+本软件使用以下第三方组件。各组件版权归其各自所有者所有。
+This software includes the following third-party components,
+each owned by its respective copyright holder.
+
+------------------------------------------------------------------------------
+1. ClassIsland.Shared.IPC 2.0.3
+   Copyright (c) 2024 HelloWRC
+   Project: https://github.com/ClassIsland/ClassIsland
+   License: GNU Lesser General Public License v3.0 only (LGPL-3.0-only)
+   https://licenses.nuget.org/LGPL-3.0-only
+
+   ★ 重要 / IMPORTANT：
+   ClassIsland.Shared.IPC 以 LGPL-3.0-only 许可分发。依据 LGPL 第 4 条
+   （Combined Works），本软件作为与之动态链接的程序，您有权：
+     - 通过重新链接的方式，使用您修改后的 ClassIsland.Shared.IPC 版本
+       替换本软件中的该组件；
+     - 在满足 LGPL 条款的前提下分发本软件。
+   本软件的源码已公开，满足"提供可重新链接之手段"的要求。
+   对本组件本身的任何修改，必须按 LGPL-3.0-only 开源。
+
+   ClassIsland.Shared.IPC is distributed under LGPL-3.0-only. Under
+   Section 4 of the LGPL (Combined Works), as a program that dynamically
+   links to it, you may:
+     - relink this software with a modified version of the component;
+     - distribute this software subject to the LGPL terms.
+   The source code of this software is available, satisfying the
+   "provide a means to relink" requirement. Any modification to the
+   component itself must be released under LGPL-3.0-only.
+
+------------------------------------------------------------------------------
+2. ClassIsland.Shared 2.0.3
+   Copyright (c) 2024 HelloWRC
+   Project: https://github.com/ClassIsland/ClassIsland
+   License: GNU Lesser General Public License v3.0 only (LGPL-3.0-only)
+   https://licenses.nuget.org/LGPL-3.0-only
+
+   传递依赖，许可条款同 1。
+   Transitive dependency; same license terms as item 1.
+
+------------------------------------------------------------------------------
+3. dotnetCampus.Ipc 2.0.0-alpha410
+   Copyright (c) 2020-2023 dotnet campus
+   Project: https://github.com/dotnet-campus/dotnetCampus.Ipc
+   License: 包元数据未声明，请以项目仓库的许可证为准。
+   License not declared in package metadata; refer to the project repository.
+
+------------------------------------------------------------------------------
+4. WebSocketSharp (websocket-sharp) 1.0.3-rc11
+   Copyright (c) 2010-2016 sta.blockhead
+   Project: https://github.com/sta/websocket-sharp
+   License: MIT
+   https://raw.github.com/sta/websocket-sharp/master/LICENSE.txt
+
+------------------------------------------------------------------------------
+5. Newtonsoft.Json 13.0.2
+   Copyright (c) 2007 James Newton-King
+   Project: https://github.com/JamesNK/Newtonsoft.Json
+   License: MIT
+   https://licenses.nuget.org/MIT
+
+------------------------------------------------------------------------------
+
+LGPL-3.0-only 许可证全文可从以下地址获取：
+The full text of the LGPL-3.0-only license is available at:
+https://www.gnu.org/licenses/lgpl-3.0.html
