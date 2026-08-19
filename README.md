@@ -7,7 +7,7 @@
 
 ## 为什么需要它
 
-ClassIsland 本身通过 .NET IPC（`dotnetCampus.Ipc`）广播日程事件。想消费这些事件的程序必须用 .NET 并引用 `ClassIsland.Shared.IPC` 包——对 Python / JS 等其他技术栈的开发者很不友好。
+ClassIsland 本身通过 .NET IPC（`dotnetCampus.Ipc`）广播日程事件。想消费这些事件的程序必须用 .NET 并引用 `ClassIsland.Shared.IPC` 包。由于 Python / JS 等其他技术栈调用 .NET 的能力较弱，因此 IPC 的形式对开发者不太友好。
 
 这个桥接器是一个**极小的 .NET 控制台程序**：
 
@@ -45,7 +45,7 @@ ClassIsland  ──IPC──▶  本桥接器 (Program.exe)  ──WebSocket─�
 | [.NET SDK](https://dotnet.microsoft.com/download) | 8.0+（仅构建需要；运行时自包含于发布产物） |
 | NuGet 包 `ClassIsland.Shared.IPC` | 2.0.3（自动还原） |
 | NuGet 包 `WebSocketSharp` | 1.0.3-rc11（自动还原） |
-| 操作系统 | Windows（ClassIsland 仅支持 Windows） |
+| 操作系统 | Windows |
 
 ## 构建与运行
 
