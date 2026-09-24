@@ -18,99 +18,172 @@ ClassIsland  ──IPC──▶  本桥接器 (Program.exe)  ──WebSocket─�
 
 任何语言只要会连 WebSocket，就能收到 ClassIsland 的课间状态。
 
-## 功能
+## 通信协议与接口
 
-- ✅ 订阅 ClassIsland 的 **下课（课间开始）** 事件，广播下节课名称
-- ✅ 订阅 ClassIsland 的 **上课** 事件
-- ✅ WebSocket 广播：`ws://localhost:6614/status`（端口/路径可改，见下方说明）
-- ✅ 零业务逻辑，纯转发，稳定可靠
-- ✅ 自动连接，无需配置
+服务端连接地址为：`ws://localhost:6614/`
 
-## 消息协议
+客户端可以通过发送纯字符串或 JSON 格式命令与服务端交互。
 
-广播的消息是**纯文本**，用 `|` 分隔类型与载荷：
+### 1. 查询可调用的功能清单 (`capabilities`)
 
-| 事件 | 消息格式 | 含义 |
-|------|----------|------|
-| 下课 | `BreakingTime|<下节课名>` | 课间开始。例如 `BreakingTime|语文` |
-| 上课 | `OnClass|None` | 上课开始 |
-
-示例：一个 Python 客户端收到 `BreakingTime|数学`，就可以弹出"下课了，下节课是数学"的提示。
-
-## 环境要求
-
-| 依赖 | 版本 |
-|------|------|
-| [ClassIsland](https://github.com/ClassIsland/ClassIsland) | 已安装并运行（提供 IPC 服务） |
-| [.NET SDK](https://dotnet.microsoft.com/download) | 8.0+（仅构建需要；运行时自包含于发布产物） |
-| NuGet 包 `ClassIsland.Shared.IPC` | 2.0.3（自动还原） |
-| NuGet 包 `WebSocketSharp` | 1.0.3-rc11（自动还原） |
-| 操作系统 | Windows |
-
-## 构建与运行
-
-```bash
-# 1. 构建
-dotnet build -c Release
-
-# 2. 运行（先启动 ClassIsland，再启动桥接器）
-dotnet run -c Release --no-build
-# 或直接运行编译产物：
-# bin/Release/net8.0-windows/ClassIsland.WSBridge.exe
+**发送请求：**
+```json
+"capabilities"
+// 或
+{"action": "capabilities"}
 ```
 
-启动顺序：**先开 ClassIsland，再开桥接器**（桥接器启动时会立刻尝试连接 ClassIsland 的 IPC 服务；连接失败会给出提示并退出）。
+**响应示例：**
 
-看到以下输出即成功：
+```json
+{
+  "type": "capabilities",
+  "data": {
+    "课程服务": [
+      "IsTimerRunning",
+      "CurrentSubject",
+      "NextClassSubject",
+      "CurrentState",
+      "CurrentSelectedIndex",
+      "OnClassLeftTime",
+      "OnBreakingTimeLeftTime",
+      "IsClassPlanEnabled",
+      "IsClassPlanLoaded",
+      "IsLessonConfirmed",
+      "CurrentTimeLayoutItem",
+      "CurrentClassPlan",
+      "NextBreakingTimeLayoutItem",
+      "NextClassTimeLayoutItem"
+    ],
+    "订阅": [
+      "OnClassNotifyId",
+      "OnBreakingTimeNotifyId"
+    ]
+  }
+}
 
 ```
-=== ClassIsland WS 桥接器启动中 ===
-正在连接 ClassIsland...
-IPC 连接成功。
-WS 服务已启动: ws://localhost:6614/status
-正在运行中... (按 Ctrl+C 退出)
+
+---
+
+### 2. 获取课程属性 (`get_properties`)
+
+提供两种调用方式：
+
+#### 方式 A：全量获取（获取所有属性）
+
+**发送请求：**
+
+```json
+"get_properties"
+// 或
+{"action": "get_properties"}
 ```
 
-## 修改端口 / 路径
+#### 方式 B：按需筛选获取（指定 `keys` 数组）
 
-编辑 `Program.cs` 顶部的两个常量后重新构建：
+**发送请求：**
 
-```csharp
-private const int WsPort = 6614;      // WebSocket 端口
-private const string WsPath = "/status"; // WebSocket 路径
+```json
+{
+  "action": "get_properties",
+  "keys": ["CurrentSubject", "OnClassLeftTime", "CurrentState"]
+}
+
 ```
 
-客户端连接地址相应变为 `ws://localhost:<WsPort><WsPath>`。
+**响应示例：**
 
-## 客户端示例
+```json
+{
+  "type": "properties",
+  "data": {
+    "CurrentSubject": "自习",
+    "OnClassLeftTime": "00:00:00",
+    "CurrentState": "OnClass"
+  }
+}
 
-### Python（websockets）
+```
+
+---
+
+### 3. 可用属性说明列表
+
+| 属性 Key | 数据类型 | 描述 |
+| --- | --- | --- |
+| `IsTimerRunning` | `bool` | 主倒计时定时器是否正在运行 |
+| `CurrentSubject` | `string` | 当前课程名称（如“语文”、“自习”） |
+| `NextClassSubject` | `string` | 下节课程名称 |
+| `CurrentState` | `string` | 当前课程状态（如 `OnClass`, `BreakingTime`） |
+| `CurrentSelectedIndex` | `int` | 当前课表中选中的节点序号 |
+| `OnClassLeftTime` | `string` | 上课剩余时间（`HH:mm:ss`） |
+| `OnBreakingTimeLeftTime` | `string` | 课间剩余时间（`HH:mm:ss`） |
+| `IsClassPlanEnabled` | `bool` | 当前课表计划是否已启用 |
+| `IsClassPlanLoaded` | `bool` | 课表计划是否已加载完成 |
+| `IsLessonConfirmed` | `bool` | 课程调课/临时安排是否已确认 |
+| `CurrentTimeLayoutItem` | `object` | 当前时间点对应的完整布局对象 |
+| `CurrentClassPlan` | `object` | 当前生效的完整课表计划数据对象 |
+| `NextBreakingTimeLayoutItem` | `object` | 下一次课间休息的时间布局数据对象 |
+| `NextClassTimeLayoutItem` | `object` | 下一节课的时间布局数据对象 |
+
+---
+
+### 4. 实时事件推送（服务端主动广播）
+
+当 ClassIsland 状态发生改变时，服务端会自动推送广播消息（无需客户端主动请求）：
+
+```json
+{"type": "event", "eventName": "OnClassNotifyId"}
+{"type": "event", "eventName": "OnBreakingTimeNotifyId"}
+```
+
+---
+
+## Python 调用示范
 
 ```python
 import asyncio
+import json
 import websockets
 
-async def main():
-    async with websockets.connect("ws://localhost:6614/status") as ws:
-        async for raw in ws:
-            kind, _, payload = raw.partition("|")
-            if kind == "BreakingTime":
-                print(f"下课了！下节课：{payload}")
-            elif kind == "OnClass":
-                print("上课了！")
+async def test_websocket_bridge():
+    uri = "ws://localhost:6614/"
+    
+    async with websockets.connect(uri) as websocket:
+        print("连接服务端成功！\n")
 
-asyncio.run(main())
-```
+        # 1. 查询接口功能清单
+        print("--- 1. 调用 capabilities 接口 ---")
+        await websocket.send(json.dumps({"action": "capabilities"}))
+        res = await websocket.recv()
+        print("响应:", json.loads(res))
 
-### JavaScript（浏览器 / Node）
+        # 2. 全量读取所有属性
+        print("\n--- 2. 全量读取课程属性 ---")
+        await websocket.send(json.dumps({"action": "get_properties"}))
+        res = await websocket.recv()
+        print("全量属性响应:", json.loads(res))
 
-```js
-const ws = new WebSocket("ws://localhost:6614/status");
-ws.onmessage = (e) => {
-  const [kind, payload] = String(e.data).split("|");
-  if (kind === "BreakingTime") console.log(`下课了！下节课：${payload}`);
-  if (kind === "OnClass") console.log("上课了！");
-};
+        # 3. 按需读取指定属性
+        print("\n--- 3. 按需指定读取 (CurrentSubject, OnClassLeftTime) ---")
+        req_body = {
+            "action": "get_properties",
+            "keys": ["CurrentSubject", "OnClassLeftTime", "CurrentState"]
+        }
+        await websocket.send(json.dumps(req_body))
+        res = await websocket.recv()
+        print("筛选属性响应:", json.loads(res))
+
+        # 4. 进入实时事件监听状态
+        print("\n--- 4. 开始监听服务端实时事件推送 ---")
+        async for msg in websocket:
+            data = json.loads(msg)
+            if data.get("type") == "event":
+                print(f"[收到实时广播事件] -> {data.get('eventName')}")
+
+if __name__ == "__main__":
+    asyncio.run(test_websocket_bridge())
 ```
 
 ## 常见问题
